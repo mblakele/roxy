@@ -545,6 +545,12 @@ class ServerConfig < MLClient
     cp << path_separator
     cp << File.expand_path("../java/xpp3-1.1.4c.jar", __FILE__)
 
+    uname = `uname`
+    if uname.downcase.include? 'cygwin'
+      cp = `cygpath -wp "#{cp}"`
+      file_args = file_args.split.map {|arg| '"' + `cygpath -wap #{arg}` + '"'}.join(' ').delete("\n")
+    end
+
     runme = %Q{java -cp #{cp} #{vm_args} #{cs} \
       com.marklogic.ps.RecordLoader #{file_args}}
     logger.info runme
