@@ -524,9 +524,9 @@ class ServerConfig < MLClient
         vm_args << " #{a}"
       else
         # allow for shell-significant characters - probably not 100% robust
-        file_args << " '"
+        file_args << " \""
         file_args << File.expand_path("../../../#{a}", __FILE__)
-        file_args << "'"
+        file_args << "\""
       end
     end
 
@@ -545,8 +545,13 @@ class ServerConfig < MLClient
     cp << path_separator
     cp << File.expand_path("../java/xpp3-1.1.4c.jar", __FILE__)
 
-    uname = `uname`
-    if uname.downcase.include? 'cygwin'
+    # Check for cygwin and fix the paths, if found
+    uname = ''
+    begin
+      uname = `uname`
+    rescue Exception=>e
+    end
+    if uname and uname.downcase.include? 'cygwin'
       cp = `cygpath -wp "#{cp}"`
       file_args = file_args.split.map {|arg| '"' + `cygpath -wap #{arg}` + '"'}.join(' ').delete("\n")
     end
